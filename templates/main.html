@@ -16,7 +16,7 @@
                     <h2>Raspberry Pi Cat Laser</h2>
                     <div id="video">
                         <!-- Set the MJPEG video stream URL in the image source below -->
-                        <img src="http://192.168.1.100:8081/videostream.cgi?rate=50"/>
+                        <img src="http://192.168.0.174:8080/videofeed"/>
                         <div id="calibrateLayer"></div>
                     </div>
                 </div>
@@ -49,6 +49,22 @@
                             </span>
                         </div>
                     </div>
+					
+					<h3>Subscribe</h3>
+                    <div id="emailSubscribe">
+                        
+                        <p>
+                            <form role="form">
+								<div class="form-group">
+									<label for="exampleInputEmail1">Email address</label>
+									<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+								</div>
+								<button id="emailButton" type="button" class="btn btn-default">Submit</button>
+								
+							</form>
+                        </p>
+                    </div>
+					
                     <h3>Calibration</h3>
                     <div id="calibrationStep">
                         <p class="description"></p>
@@ -57,6 +73,7 @@
                             <button type="button" class="btn btn-default pull-right"></button>
                         </p>
                     </div>
+					
                 </div>
             </div>
         </div>
@@ -67,6 +84,16 @@
         <script src="{{ url_for('static', filename='js/calibration.js') }}"></script>
         <script>
             $(document).ready(function() {
+			
+				document.getElementById("emailButton").onclick = function() { 		
+					$.ajax({ 
+						url: '/add/email/' + $('#exampleInputEmail1').val(), 
+						type: 'PUT'
+                    })
+					$('#exampleInputEmail1').val('');		
+					alert('You will be notified the next time the cat appears!');
+				};
+				
                 // Setup servo controls
                 var setupAxis = function(axis) {
                     var group = $('#' + axis);

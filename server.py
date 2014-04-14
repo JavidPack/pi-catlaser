@@ -2,6 +2,9 @@ from flask import *
 import json, sys
 
 import model
+import motionDetector
+
+import smtplib
 
 # Flask app configuration
 DEBUG = True
@@ -31,6 +34,12 @@ else:
 	servos = servos.Servos(SERVO_I2C_ADDRESS, SERVO_XAXIS_CHANNEL, SERVO_YAXIS_CHANNEL, SERVO_PWM_FREQ)
 
 model = model.LaserModel(servos, SERVO_MIN, SERVO_MAX, SERVO_CENTER)
+#import motionDetector
+#md = motionDetector.MotionDetector()
+
+# Email notification system
+emailRecipiants = []
+
 
 # Main view for rendering the web page
 @app.route('/')
@@ -79,7 +88,53 @@ def setCalibration():
 def target(x, y):
 	model.target(x, y)
 	return successNoResponse()
+    
+    
+@app.route('/add/email/<email>', methods=['PUT'])
+def addEmail(email):
+    global emailRecipiants
+    print emailRecipiants
+    emailRecipiants.append(email.encode("ascii"))
+    return successNoResponse()
+    
+@app.route('/catAppears', methods=['POST'])
+def catAppears():
+    global emailRecipiants
+    print 'heyy' 
+    print emailRecipiants
+    for email in emailRecipiants:
+        print 'email:',email
+        sendEmail(email)
+    emailRecipiants = []
+    return successNoResponse()   
+ 
+@app.route('/testtest', methods=['PUT'])
+def testtest():
+    print '~~~~~~~~~'
+    return successNoResponse()
+    
 
+def sendEmail(email):
+    SERVER = "smtp.gmail.com"
+    FROM = "fromemail@gmail.com"
+    TO = [email] # must be a list
+    SUBJECT = ""
+    TEXT = "Your cat is ready to play!"
+    message = """\
+From: %s
+To: %s
+Subject: %s
+
+%s
+""" % (FROM, ", ".join(TO), SUBJECT, TEXT)
+    
+    server = smtplib.SMTP(SERVER)
+    server.starttls()
+    server.login( FROM, 'password' )
+    server.sendmail(FROM, TO, message)
+    server.quit()
+    
+    
 # Start running the flask app
 if __name__ == '__main__':
 	app.run(host='0.0.0.0')

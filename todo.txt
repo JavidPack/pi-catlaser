@@ -1,0 +1,18 @@
+1.	Cat present (This can notify the owner (who is at work) via email)
+--history image
+
+DONE!
+
+Cat climbing on prohibited areas (Senses that the cat is somewhere it shouldn’t be)
+--Movement in area, play loud noise
+
+DONE!
+
+Cat wants treat (Cat swipes at specified area and a treat is dispensed)
+--Movement in area, dispense treat.(For now, noise.)
+
+??
+
+Cat is tired or asleep (Prevents users from pointing laser)
+--History image, cat present but not moving. Notify Webapp, prevent input.
+
