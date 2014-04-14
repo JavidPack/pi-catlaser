@@ -22,7 +22,7 @@ class MotionDetector(object):
         self.stream=urllib.urlopen('http://192.168.0.174:8080/videofeed')
         self.bytes=''  
         self.winName = "Movement Indicator"
-        cv2.namedWindow(self.winName, cv2.CV_WINDOW_AUTOSIZE)
+        #cv2.namedWindow(self.winName, cv2.CV_WINDOW_AUTOSIZE)
 
         # Read three images first:
         self.t_minus = cv2.cvtColor(self.getImage(), cv2.COLOR_RGB2GRAY)
@@ -31,13 +31,18 @@ class MotionDetector(object):
         
         self.height,self.width = self.t.shape
 
+        self.diff_t = None
+        self.badArea = None
+        
         while True:
           self.diff_t = self.diffImg(self.t_minus, self.t, self.t_plus)
+          
+          ret,self.diff_t = cv2.threshold(self.diff_t,20,255,cv2.THRESH_BINARY)
           
           self.badArea = self.diff_t[self.height*self.badY1:self.height*self.badY2 ,self.width*self.badX1:self.width*self.badX2]
           
           
-          cv2.imshow( self.winName, self.diff_t )
+          #cv2.imshow( self.winName, self.badArea )
           print self.height*self.badY1 , self.height*self.badY2 , self.width*self.badX1 , self.width*self.badX2
           
           
@@ -47,20 +52,27 @@ class MotionDetector(object):
           self.t_plus = cv2.cvtColor(self.getImage(), cv2.COLOR_RGB2GRAY)
           
          
-          totalMovement = cv2.countNonZero(cv2.inRange(self.diff_t,100,255))
+          #totalMovement = cv2.countNonZero(cv2.inRange(self.diff_t,100,255))
           
-          totalMovementBad = cv2.countNonZero(cv2.inRange(self.badArea,100,255))
+          #totalMovementBad = cv2.countNonZero(cv2.inRange(self.badArea,100,255))
+          
+          
+          #ret,self.thresh = cv2.threshold(self.diff_t,100,255,cv2.THRESH_BINARY)
+          
+          totalMovement = cv2.countNonZero(self.diff_t)
+          
+          totalMovementBad = cv2.countNonZero(self.badArea)
 
           
           print totalMovement,totalMovementBad
           
-          if totalMovement - totalMovementBad > 50:
+          if totalMovement - totalMovementBad > 500:
             elapsedCat = (time.time() - lastCat)
             if elapsedCat > 5:
                 u = urllib.urlopen("http://localhost:5000/catAppears", '')
                 print 'cat!'
                 lastCat = time.time()
-          if totalMovementBad > 50:
+          if totalMovementBad > 500:
             elapsedBad = (time.time() - lastBad)
             if elapsedBad > 5:
                 pygame.mixer.init()
@@ -70,10 +82,10 @@ class MotionDetector(object):
                     continue
                 lastBad = time.time()
           
-          key = cv2.waitKey(10)
-          if key == 27:
-            cv2.destroyWindow(self.winName)
-            break
+          #key = cv2.waitKey(10)
+          #if key == 27:
+            #cv2.destroyWindow(self.winName)
+            #break
 
     def inverte(self,imagem):
         imagem = (255-imagem)
